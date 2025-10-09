@@ -1,0 +1,14 @@
+# docker-compose.yml
+version: "3.9"
+services:
+  web:
+    container_name: starter-next-docker-development
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app # live code sync
+      - /app/node_modules/
+    ports:
+      - "3000:3000"
+  

@@ -1,0 +1,6 @@
+In package.json:
+  "dev": "WATCHPACK_POLLING=true next dev"
+
+In next.config.ts
+  output: "standalone",
+
