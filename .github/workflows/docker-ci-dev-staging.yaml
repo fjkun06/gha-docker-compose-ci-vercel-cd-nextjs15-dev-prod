@@ -56,7 +56,7 @@ jobs:
       # --------------------------
       - name: Push to Docker Hub
         run: docker push fjkun06/basic-app-dev:v1  # Uploads the tested image to Docker Hub for deployment or reuse
-
+        
   vercel-deploy:
     needs: docker-build-and-push  # ✅ only run if  succeeds
     runs-on: ubuntu-latest
@@ -65,12 +65,26 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ -f yarn.lock ]; then
+            echo "Detected yarn.lock — installing via Yarn..."
+            yarn --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            echo "Detected package-lock.json — installing via npm..."
+            npm ci
+          elif [ -f pnpm-lock.yaml ]; then
+            echo "Detected pnpm-lock.yaml — installing via pnpm..."
+            corepack enable pnpm
+            pnpm install --frozen-lockfile
+          else
+            echo "❌ No lockfile found. Aborting."
+            exit 1
+          fi
         working-directory: ./my-app
 
       - name: Install Vercel CLI
