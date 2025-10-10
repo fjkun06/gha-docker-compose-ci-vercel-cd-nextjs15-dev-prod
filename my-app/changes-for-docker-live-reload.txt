@@ -1,0 +1,10 @@
+In package.json:
+  "dev": "cross-env WATCHPACK_POLLING=true next dev"
+
+In next.config.ts
+  output: "standalone",
+
+Install:
+  npm install cross-env --save-dev
+
+
