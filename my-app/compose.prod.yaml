@@ -2,7 +2,7 @@ version: "3.9"
 services:
   web:
     container_name: starter-next-docker-production
-    image: fjkun06/basic-app-prod:v1
+    image: fjkun06/basic-app-prod:v2
     build:
       context: .
       dockerfile: Dockerfile.prod

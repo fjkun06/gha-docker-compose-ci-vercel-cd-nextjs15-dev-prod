@@ -1,0 +1,58 @@
+# ---------------------------------------------
+# GitHub Actions Workflow: Docker CI Pipeline
+# Purpose: Build and push Docker images
+# Triggered automatically on pushes and PRs to main branch
+# ---------------------------------------------
+
+name: Docker CI
+
+on:
+  push:
+    branches: [ main ]  # Run workflow when code is pushed to the main branch
+  pull_request:
+    branches: [ main ]  # Also run on pull requests targeting main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest  # Use the latest stable Ubuntu runner environment
+
+    steps:
+      # --------------------------
+      # Step 1: Check out source code
+      # --------------------------
+      - name: Checkout repo
+        uses: actions/checkout@v5  # Fetch the repository's code so it can be built and tested
+
+      # --------------------------
+      # Step 2: Set up Docker Buildx
+      # --------------------------
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3  # Enables advanced Docker build features (multi-platform builds, caching, etc.)
+
+      # --------------------------
+      # Step 3: Authenticate to Docker Hub
+      # --------------------------
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}  # Securely pulled from repository secrets
+          password: ${{ secrets.DOCKERHUB_TOKEN }}     # Used to authenticate and allow image push access
+
+      # --------------------------
+      # Step 4: Build the Docker image
+      # --------------------------
+      - name: Build Docker image
+        run: docker compose -f compose.prod.yaml build  # Build image with compose configs for production
+        working-directory: ./my-app
+
+      # --------------------------
+      # Step 5: Run automated tests inside the container
+      # --------------------------
+      # - name: Run tests inside container
+        # run: docker run myuser/my-app:latest npm test  # Executes the app's test suite within the built container
+
+      # --------------------------
+      # Step 6: Push image to Docker Hub
+      # --------------------------
+      - name: Push to Docker Hub
+        run: docker push fjkun06/basic-app-prod:v2  # Uploads the tested image to Docker Hub for deployment or reuse
