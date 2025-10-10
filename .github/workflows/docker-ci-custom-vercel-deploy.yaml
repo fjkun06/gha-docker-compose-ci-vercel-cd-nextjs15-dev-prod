@@ -61,44 +61,136 @@ jobs:
       # - name: Push to Docker Hub
         # run: docker push fjkun06/basic-app-dev:v1  # Uploads the tested image to Docker Hub for deployment or reuse
         
-  vercel-cli-build:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v5
-    
-        - name: Install Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: 22
-    
-        - name: Install Vercel CLI
-          run: |
-            if [ -f yarn.lock ]; then
-              echo "Detected yarn.lock — installing via Yarn..."
-              yarn global add vercel@canary
-            elif [ -f package-lock.json ]; then
-              echo "Detected package-lock.json — installing via npm..."
-              npm install --global vercel
-            elif [ -f pnpm-lock.yaml ]; then
-              echo "Detected pnpm-lock.yaml — installing via pnpm..."
-              corepack enable pnpm
-              pnpm add -g vercel@canary
-            else
-              echo "❌ No lockfile found. Aborting."
-              exit 1
-            fi
-    
-        - name: Pull Vercel Environment Information
-          run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-    
-        - name: Build Project Artifacts
-          run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+  vercel-build:
+    runs-on: ubuntu-latest
+    outputs:
+      build-path: ${{ steps.set-artifact-path.outputs.build-path }}
 
-        - name: Deploy Project Artifacts to Vercel
-          id: deploy
-          shell: bash
-          run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: |
+          if [ -f yarn.lock ]; then
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f pnpm-lock.yaml ]; then
+            corepack enable pnpm
+            pnpm install --frozen-lockfile
+          else
+            echo "❌ No lockfile found. Aborting."
+            exit 1
+          fi
+
+      - name: Install Vercel CLI
+        run: |
+          if [ -f yarn.lock ]; then
+            yarn global add vercel@canary
+          elif [ -f package-lock.json ]; then
+            npm install -g vercel
+          elif [ -f pnpm-lock.yaml ]; then
+            pnpm add -g vercel@canary
+          fi
+
+      - name: Pull Vercel Environment Variables
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-build
+          path: .vercel/output
+
+      - name: Set build path output
+        id: set-artifact-path
+        run: echo "build-path=.vercel/output" >> $GITHUB_OUTPUT
+
+  # ----------------------------
+  # Job 2: Deploy the Vercel project
+  # ----------------------------
+  vercel-deploy:
+    runs-on: ubuntu-latest
+    needs: vercel-build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-build
+          path: .vercel/output
+
+      - name: Install Vercel CLI
+        run: |
+          if [ -f yarn.lock ]; then
+            yarn global add vercel@canary
+          elif [ -f package-lock.json ]; then
+            npm install -g vercel
+          elif [ -f pnpm-lock.yaml ]; then
+            pnpm add -g vercel@canary
+          fi
+
+      - name: Deploy to Vercel Preview
+        id: deploy
+        shell: bash
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --yes
+
+      - name: Output Preview URL
+        run: echo "Preview URL: $(tail -1 deploy.log || echo 'URL not captured')"
+  # vercel-cli-build:
+  #     runs-on: ubuntu-latest
+  #     steps:
+  #       - name: Checkout repository
+  #         uses: actions/checkout@v5
+    
+  #       - name: Install Node.js
+  #         uses: actions/setup-node@v4
+  #         with:
+  #           node-version: 22
+    
+  #       - name: Install Vercel CLI
+  #         run: |
+  #           if [ -f yarn.lock ]; then
+  #             echo "Detected yarn.lock — installing via Yarn..."
+  #             yarn global add vercel@canary
+  #           elif [ -f package-lock.json ]; then
+  #             echo "Detected package-lock.json — installing via npm..."
+  #             npm install --global vercel
+  #           elif [ -f pnpm-lock.yaml ]; then
+  #             echo "Detected pnpm-lock.yaml — installing via pnpm..."
+  #             corepack enable pnpm
+  #             pnpm add -g vercel@canary
+  #           else
+  #             echo "❌ No lockfile found. Aborting."
+  #             exit 1
+  #           fi
+    
+  #       - name: Pull Vercel Environment Information
+  #         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+    
+  #       - name: Build Project Artifacts
+  #         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+  #       - name: Deploy Project Artifacts to Vercel
+  #         id: deploy
+  #         shell: bash
+  #         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
     
         # - name: Upload build artifacts
         #   uses: actions/upload-artifact@v4
