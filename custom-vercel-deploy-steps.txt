@@ -1,0 +1,17 @@
+1. Copy your Vercel Access Token (from account)
+
+2. Install the Vercel CLI locally in your repository and run vercel login
+    npm install --global vercel
+    vercel login (to log in)
+
+3. Then to create a new Vercel project or link an existing one, run:
+    vercel link
+
+4. The Vercel CLI now generated a.vercel folder, copy over the projectId 
+    and orgId from the project.json
+
+5. Add these values as new repository secrets in GitHub: 
+    VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID as secrets
+      - Navigate to your GitHub Repository Settings Tab
+      - In the menu navigate to “Secrets and variables” —> “Actions”
+      - Click on the button “New repository secret” to add a new secret

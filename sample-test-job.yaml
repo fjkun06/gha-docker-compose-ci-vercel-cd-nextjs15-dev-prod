@@ -1,0 +1,30 @@
+name: Feature branch integration & deployment
+
+env:
+  NODE_VERSION: 20
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  Test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Set node version
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      # Install dependencies
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Test
+      - name: Test project
+        run: yarn test
