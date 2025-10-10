@@ -13,7 +13,7 @@ on:
     branches: [ main ]  # Also run on pull requests targeting main
 
 jobs:
-  build-and-push:
+  docker-build-and-push:
     runs-on: ubuntu-latest  # Use the latest stable Ubuntu runner environment
 
     steps:
