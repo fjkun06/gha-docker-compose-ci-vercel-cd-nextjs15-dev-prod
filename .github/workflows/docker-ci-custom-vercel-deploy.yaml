@@ -2,9 +2,6 @@
 # GitHub Actions Workflow: Docker CI Pipeline
 # Purpose: Build and push Docker images
 # Triggered automatically on pushes and PRs to staging branch
-# !!!!!!!!!!!!!!!!IMPORTANT!!!!!!!!!!!!!!!!!!!!!
-# If your app files are already in the root of the repository
-# delete all './my-app' in this file or rename
 # my-app to your app name in github folder
 # ---------------------------------------------
 
@@ -24,9 +21,6 @@ env:
 jobs:
   docker-build-and-push:
     runs-on: ubuntu-latest  # Use the latest stable Ubuntu runner environment
-    defaults:
-      run:
-        working-directory: ./my-app
     steps:
       # --------------------------
       # Step 1: Check out source code
@@ -69,9 +63,6 @@ jobs:
         
   vercel-cli-build:
       runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: ./my-app
       steps:
         - name: Checkout repository
           uses: actions/checkout@v5
@@ -108,7 +99,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: build
-            path: ./my-app/.vercel/output
+            path: .vercel/output
   
   # ------------------------------------------------------
   
@@ -133,7 +124,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build
-          path: ./my-app/.vercel/output
+          path: .vercel/output
   
       - name: Install Vercel CLI
         run: |
