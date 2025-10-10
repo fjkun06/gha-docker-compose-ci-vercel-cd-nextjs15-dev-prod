@@ -108,9 +108,6 @@ jobs:
     needs: [docker-build-and-push, vercel-cli-build]
     runs-on: ubuntu-latest
     if: ${{ success() }}
-    defaults:
-      run:
-        working-directory: ./my-app
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
