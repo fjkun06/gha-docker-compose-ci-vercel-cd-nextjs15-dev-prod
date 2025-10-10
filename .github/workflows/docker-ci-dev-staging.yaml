@@ -56,3 +56,25 @@ jobs:
       # --------------------------
       - name: Push to Docker Hub
         run: docker push fjkun06/basic-app-dev:v1  # Uploads the tested image to Docker Hub for deployment or reuse
+
+  vercel-deploy:
+    needs: docker-build-and-push  # ✅ only run if  succeeds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./my-app
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel
+        run: vercel --token ${{ secrets.VERCEL_TOKEN }} --cwd ./my-app --confirm
