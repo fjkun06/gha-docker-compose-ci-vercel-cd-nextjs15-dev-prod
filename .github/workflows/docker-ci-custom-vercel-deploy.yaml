@@ -1,0 +1,165 @@
+# ---------------------------------------------
+# GitHub Actions Workflow: Docker CI Pipeline
+# Purpose: Build and push Docker images
+# Triggered automatically on pushes and PRs to staging branch
+# ---------------------------------------------
+
+name: Docker CI Development Custom Vercel Deploy
+
+on:
+  push:
+    branches: [ staging ]  # Run workflow when code is pushed to the staging branch
+  pull_request:
+    types: [opened, synchronize]
+    branches: [ staging ]  # Also run on pull requests targeting staging
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  docker-build-and-push:
+    runs-on: ubuntu-latest  # Use the latest stable Ubuntu runner environment
+
+    steps:
+      # --------------------------
+      # Step 1: Check out source code
+      # --------------------------
+      - name: Checkout repo
+        uses: actions/checkout@v5  # Fetch the repository's code so it can be built and tested
+
+      # --------------------------
+      # Step 2: Set up Docker Buildx
+      # --------------------------
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3  # Enables advanced Docker build features (multi-platform builds, caching, etc.)
+
+      # --------------------------
+      # Step 3: Authenticate to Docker Hub
+      # --------------------------
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}  # Securely pulled from repository secrets
+          password: ${{ secrets.DOCKERHUB_TOKEN }}     # Used to authenticate and allow image push access
+
+      # --------------------------
+      # Step 4: Build the Docker image
+      # --------------------------
+      - name: Build Docker image
+        run: docker compose build  # Build image with compose configs for development
+        working-directory: ./my-app
+
+      # --------------------------
+      # Step 5: Run automated tests inside the container
+      # --------------------------
+      # - name: Run tests inside container
+        # run: docker run myuser/my-app:latest npm test  # Executes the app's test suite within the built container
+
+      # --------------------------
+      # Step 6: Push image to Docker Hub
+      # --------------------------
+      - name: Push to Docker Hub
+        run: docker push fjkun06/basic-app-dev:v1  # Uploads the tested image to Docker Hub for deployment or reuse
+        
+  vercel-cli-build:
+    needs: docker-build-and-push  # ✅ only run if  succeeds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          
+      # Install Vercel CLI
+      - name: Install Vercel CLI
+        run: |
+          if [ -f yarn.lock ]; then
+            echo "Detected yarn.lock — installing via Yarn..."
+            yarn global add vercel@canary
+          elif [ -f package-lock.json ]; then
+            echo "Detected package-lock.json — installing via npm..."
+            npm install --global
+          elif [ -f pnpm-lock.yaml ]; then
+            echo "Detected pnpm-lock.yaml — installing via pnpm..."
+            corepack enable pnpm
+            pnpm add -g vercel@canary
+          else
+            echo "❌ No lockfile found. Aborting."
+            exit 1
+          fi
+        working-directory: ./my-app
+        
+      # Pull Vercel Environment Information
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./my-app
+
+        # Build
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: ./my-app
+
+        # Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: ./my-app/.vercel/output
+        
+  vercel-deploy-preview:
+    name: Deploy to preview environment
+    needs: [docker-build-and-push, vercel-cli-build]  # ✅ only run if  succeeds
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: ${{ steps.seturl.outputs.url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          
+         # Download build artifcact
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: ./my-app/.vercel/output/
+
+  # Install Vercel CLI
+      - name: Install Vercel CLI
+        run: |
+          if [ -f yarn.lock ]; then
+            echo "Detected yarn.lock — installing via Yarn..."
+            yarn global add vercel@canary
+          elif [ -f package-lock.json ]; then
+            echo "Detected package-lock.json — installing via npm..."
+            npm install --global
+          elif [ -f pnpm-lock.yaml ]; then
+            echo "Detected pnpm-lock.yaml — installing via pnpm..."
+            corepack enable pnpm
+            pnpm add -g vercel@canary
+          else
+            echo "❌ No lockfile found. Aborting."
+            exit 1
+          fi
+        working-directory: ./my-app
+
+      # Deploy
+      - name: Deploy Project Artifacts to Vercel
+        shell: bash
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} | tee deploy.log
+        working-directory: ./my-app
+
+      # Set preview url
+      - id: seturl
+        name: Set preview url
+        run: echo "url=$(tail -1 deploy.log)">> $GITHUB_OUTPUT
+     
