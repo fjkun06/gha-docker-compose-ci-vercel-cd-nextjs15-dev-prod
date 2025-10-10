@@ -52,7 +52,7 @@ jobs:
       # --------------------------
       # Step 4: Build the Docker image
       # --------------------------
-      - name: Build Docker image
+      # - name: Build Docker image
         # run: docker compose build  # Build image with compose configs for development
 
       # --------------------------
@@ -64,7 +64,7 @@ jobs:
       # --------------------------
       # Step 6: Push image to Docker Hub
       # --------------------------
-      - name: Push to Docker Hub
+      # - name: Push to Docker Hub
         # run: docker push fjkun06/basic-app-dev:v1  # Uploads the tested image to Docker Hub for deployment or reuse
         
   vercel-cli-build:
