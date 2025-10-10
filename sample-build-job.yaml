@@ -1,0 +1,42 @@
+name: Feature branch integration & deployment
+
+env:
+  NODE_VERSION: 20
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+
+jobs:
+  Build:
+    name: Build for Vercel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Set node version
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+
+      # Install Vercel CLI
+      - name: Install Vercel CLI
+        run: yarn global add vercel@canary
+
+      # Pull Vercel Environment Information
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Build
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: .vercel/output
