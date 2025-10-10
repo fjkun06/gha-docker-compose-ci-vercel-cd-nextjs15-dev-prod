@@ -82,7 +82,7 @@ jobs:
             yarn global add vercel@canary
           elif [ -f package-lock.json ]; then
             echo "Detected package-lock.json — installing via npm..."
-            npm install --global
+            npm install --global vercel
           elif [ -f pnpm-lock.yaml ]; then
             echo "Detected pnpm-lock.yaml — installing via pnpm..."
             corepack enable pnpm
@@ -91,6 +91,7 @@ jobs:
             echo "❌ No lockfile found. Aborting."
             exit 1
           fi
+        working-directory: ./my-app
         
       # Pull Vercel Environment Information
       - name: Pull Vercel Environment Information
