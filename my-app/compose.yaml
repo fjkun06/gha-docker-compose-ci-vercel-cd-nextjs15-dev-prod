@@ -3,7 +3,7 @@ version: "3.9"
 services:
   web:
     container_name: starter-next-docker-development
-    image: fjkun06/basic-app-dev:v1
+    image: fjkun06/basic-app-dev:v2
     build:
       context: .
       dockerfile: Dockerfile.dev
