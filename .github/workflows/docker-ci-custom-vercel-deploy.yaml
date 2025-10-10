@@ -140,8 +140,8 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         id: deploy
         shell: bash
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} | tee deploy.log
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
   
-      - id: seturl
-        name: Set preview URL
-        run: echo "url=$(tail -1 deploy.log)" >> $GITHUB_OUTPUT
+      # - id: seturl
+      #   name: Set preview URL
+      #   run: echo "url=$(tail -1 deploy.log)" >> $GITHUB_OUTPUT
