@@ -1,16 +1,16 @@
 # ---------------------------------------------
 # GitHub Actions Workflow: Docker CI Pipeline
 # Purpose: Build and push Docker images
-# Triggered automatically on pushes and PRs to main branch
+# Triggered automatically on pushes and PRs to staging branch
 # ---------------------------------------------
 
 name: Docker CI Development
 
 on:
   push:
-    branches: [ main ]  # Run workflow when code is pushed to the main branch
+    branches: [ staging ]  # Run workflow when code is pushed to the staging branch
   pull_request:
-    branches: [ main ]  # Also run on pull requests targeting main
+    branches: [ staging ]  # Also run on pull requests targeting staging
 
 jobs:
   docker-build-and-push:
@@ -42,7 +42,7 @@ jobs:
       # Step 4: Build the Docker image
       # --------------------------
       - name: Build Docker image
-        run: docker compose build  # Build image with compose configs for production
+        run: docker compose build  # Build image with compose configs for development
         working-directory: ./my-app
 
       # --------------------------
