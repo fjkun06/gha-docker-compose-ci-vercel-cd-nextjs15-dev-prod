@@ -1,0 +1,10 @@
+Local Development:
+	docker compose up
+
+
+Build Production:
+	docker compose -f compose.prod.yaml build
+
+
+Push Production:
+	docker compose username/image_name:ver push (Lookup in compose.prod.yaml)
