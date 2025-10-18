@@ -8,9 +8,9 @@ name: Docker CI Development
 
 on:
   push:
-    branches: [ stagingx ]  # Run workflow when code is pushed to the staging branch
+    branches: [ staging ]  # Run workflow when code is pushed to the staging branch
   pull_request:
-    branches: [ stagingx ]  # Also run on pull requests targeting staging
+    branches: [ staging ]  # Also run on pull requests targeting staging
 
 jobs:
   docker-build-and-push:
