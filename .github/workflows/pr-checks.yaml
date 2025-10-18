@@ -1,11 +1,6 @@
 name: CI Checks (Lint + Test + Build)
 
 on:
-  push:
-    branches:
-      - main
-      - staging
-      # - '**' # optional, for all PRs
   pull_request:
     branches:
       - main
