@@ -9,10 +9,10 @@ name: Docker CI Development Custom Vercel Deploy
 
 on:
   push:
-    branches: [ staging ]  # Run workflow when code is pushed to the staging branch
+    branches: [ stagingg ]  # Run workflow when code is pushed to the staging branch
   pull_request:
     types: [opened, synchronize]
-    branches: [ staging ]  # Also run on pull requests targeting staging
+    branches: [ stagingg ]  # Also run on pull requests targeting staging
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
