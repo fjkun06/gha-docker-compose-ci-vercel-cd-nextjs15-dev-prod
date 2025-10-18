@@ -8,9 +8,9 @@ name: Docker CI
 
 on:
   push:
-    branches: [ main ]  # Run workflow when code is pushed to the main branch
+    branches: [ xxxx ]  # Run workflow when code is pushed to the main branch
   pull_request:
-    branches: [ main ]  # Also run on pull requests targeting main
+    branches: [ xxxx ]  # Also run on pull requests targeting main
 
 jobs:
   docker-build-and-push:
