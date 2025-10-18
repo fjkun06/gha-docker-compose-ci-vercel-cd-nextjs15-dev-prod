@@ -43,7 +43,6 @@ jobs:
       # --------------------------
       - name: Build Docker image
         run: docker compose build  # Build image with compose configs for development
-        working-directory: ./my-app
 
       # --------------------------
       # Step 5: Run automated tests inside the container
@@ -57,38 +56,41 @@ jobs:
       - name: Push to Docker Hub
         run: docker push fjkun06/basic-app-dev:v1  # Uploads the tested image to Docker Hub for deployment or reuse
         
-  vercel-deploy:
-    needs: docker-build-and-push  # ✅ only run if  succeeds
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+  vercel-cli-build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v5
+    
+        - name: Install Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: 22
+    
+        - name: Install Vercel CLI
+          run: |
+            if [ -f yarn.lock ]; then
+              echo "Detected yarn.lock — installing via Yarn..."
+              yarn global add vercel@canary
+            elif [ -f package-lock.json ]; then
+              echo "Detected package-lock.json — installing via npm..."
+              npm install --global vercel
+            elif [ -f pnpm-lock.yaml ]; then
+              echo "Detected pnpm-lock.yaml — installing via pnpm..."
+              corepack enable pnpm
+              pnpm add -g vercel@canary
+            else
+              echo "❌ No lockfile found. Aborting."
+              exit 1
+            fi
+    
+        - name: Pull Vercel Environment Information
+          run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+    
+        - name: Build Project Artifacts
+          run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install dependencies
-        run: |
-          if [ -f yarn.lock ]; then
-            echo "Detected yarn.lock — installing via Yarn..."
-            yarn --frozen-lockfile
-          elif [ -f package-lock.json ]; then
-            echo "Detected package-lock.json — installing via npm..."
-            npm ci
-          elif [ -f pnpm-lock.yaml ]; then
-            echo "Detected pnpm-lock.yaml — installing via pnpm..."
-            corepack enable pnpm
-            pnpm install --frozen-lockfile
-          else
-            echo "❌ No lockfile found. Aborting."
-            exit 1
-          fi
-        working-directory: ./my-app
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel
-
-      - name: Deploy to Vercel
-        run: vercel --token ${{ secrets.VERCEL_TOKEN }} --yes
+        - name: Deploy Project Artifacts to Vercel
+          id: deploy
+          shell: bash
+          run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
