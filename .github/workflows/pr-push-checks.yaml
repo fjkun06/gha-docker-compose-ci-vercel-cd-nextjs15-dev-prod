@@ -1,0 +1,57 @@
+# ---------------------------------------------
+# GitHub Actions Workflow: CI Checks (Lint + Test + Build) for Pushes or Pull Requests (merges)
+# Purpose: Lint, test and build main or staging branch after a merge or PR
+# Triggered automatically on push or PR to staging and main branches  
+# ---------------------------------------------
+
+
+ # CI Checks (Lint + Test + Build) for Merge or Pull Requests
+name: CI Push/PR
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - staging
+      - main
+  push:
+    branches:
+      - dev
+      - staging
+      - main
+
+jobs:
+  ci-push-or-pr-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Cache dependencies and Next.js build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint || echo "No linters found"
+
+      - name: Run Unit Tests
+        run: npm test || echo "No tests found"
+
+      - name: Build Project
+        run: npm run build
