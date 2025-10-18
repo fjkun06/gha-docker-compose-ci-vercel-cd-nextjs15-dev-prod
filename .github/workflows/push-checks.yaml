@@ -10,8 +10,8 @@ name: CI Push
 on:
   push:
     branches:
-      - main
-      - staging
+      - xxxx
+      - xxxxx
       # - '**' # optional, for all PRs
 jobs:
   ci-checks:
