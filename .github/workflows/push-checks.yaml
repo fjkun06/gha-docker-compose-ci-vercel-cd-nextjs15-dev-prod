@@ -1,4 +1,11 @@
-name: CI Checks (Lint + Test + Build) for Pushes
+# ---------------------------------------------
+# GitHub Actions Workflow: CI Checks (Lint + Test + Build) for Pushes (merges)
+# Purpose: Lint, test and build main or staging branch after a merge
+# Triggered automatically on pushes to staging and main branches  
+# ---------------------------------------------
+
+
+name: CI Push
 
 on:
   push:
