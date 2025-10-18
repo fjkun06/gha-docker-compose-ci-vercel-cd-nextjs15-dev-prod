@@ -1,2 +1,2 @@
-# docker-compose-ci-cd
+# docker-compose-ci-cd ...
 A full working CI/CD implementation for a docker container.
