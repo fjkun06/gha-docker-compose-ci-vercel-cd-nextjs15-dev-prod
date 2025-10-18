@@ -4,7 +4,7 @@
 # Triggered automatically on pushes and PRs to staging branch
 # ---------------------------------------------
 
-name: Docker CI Development
+name: Docker CI Development   
 
 on:
   push:
