@@ -10,10 +10,16 @@ name: CI Push/PR
 
 on:
   pull_request:
-    branches: ["main", "staging", "dev"]
-      # - '**' # optional, for all PRs
+    branches:
+     - '**'
+     # - main
+     # - staging
+     # - dev
   push:
-    branches: ["main", "staging", "dev"]
+    branches:
+     - main
+     - staging
+     - dev
       # - '**' # optional, for all PRs
 
 jobs:
