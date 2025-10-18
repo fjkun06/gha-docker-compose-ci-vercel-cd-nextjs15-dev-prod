@@ -1,7 +1,7 @@
 # ---------------------------------------------
 # GitHub Actions Workflow: Docker CI Pipeline
 # Purpose: Build and push Docker images
-# Triggered automatically on pushes and PRs to staging branch
+# Triggered automatically on pushes and PRs to staging branch  
 # ---------------------------------------------
 
 name: Docker CI Development   
