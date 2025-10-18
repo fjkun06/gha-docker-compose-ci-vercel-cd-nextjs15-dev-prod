@@ -2,10 +2,12 @@
 name: Vercel Deploy
 
 on:
-  workflow_run:
-    workflows: ["Docker CI"]  # name of the workflow that builds & pushes Docker
-    types:
-      - completed
+  push:
+    branches: [xxxx]
+  # workflow_run:
+  #   workflows: ["Docker CI"]  # name of the workflow that builds & pushes Docker
+  #   types:
+  #     - completed
       
   # ----------------------
   # Job 2: Deploy to Vercel
