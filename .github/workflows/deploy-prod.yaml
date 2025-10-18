@@ -47,6 +47,7 @@ jobs:
           else
             echo "❌ No lockfile found. Aborting."
             exit 1
+          fi
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
