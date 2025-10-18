@@ -1,4 +1,12 @@
-name: CI Checks (Lint + Test + Build) for Pull Requests
+# ---------------------------------------------
+# GitHub Actions Workflow: CI Checks (Lint + Test + Build) for Pushes or Pull Requests (merges)
+# Purpose: Lint, test and build main or staging branch after a merge or PR
+# Triggered automatically on push or PR to staging and main branches  
+# ---------------------------------------------
+
+
+ # CI Checks (Lint + Test + Build) for Merge or Pull Requests
+name: CI Push/PR
 
 on:
   pull_request:
@@ -6,9 +14,14 @@ on:
       - main
       - staging
       # - '**' # optional, for all PRs
+  push:
+    branches:
+      - main
+      - staging
+      # - '**' # optional, for all PRs
 
 jobs:
-  ci-checks:
+  ci-push-or-pr-checks:
     runs-on: ubuntu-latest
 
     steps:
