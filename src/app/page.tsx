@@ -21,7 +21,7 @@ export default function Home() {
             . Testxxxx Preview
           </li>
           <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
+            Save and see your changes instantly. STAGING
           </li>
         </ol>
 
